@@ -1,0 +1,4 @@
+cryptography==42.0.0
+flask==3.0.0
+click==8.1.7
+pytest==7.4.3
