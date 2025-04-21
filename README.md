@@ -1,10 +1,15 @@
-## Three components
-Issuer: Issues and revokes credentials
-Holder Wallet: Stores and presents credentials
-Verifier: Validates credentials without contacting the issuer
+# Privacy-Preserving Digital Credential System
 
-## Projetc Streucture
+## Overview
 
+This system demonstrates a privacy-preserving digital credential system with revocation capabilities, implementing three key components:
+- **Issuer**: Issues and revokes credentials
+- **Holder Wallet**: Stores and presents credentials
+- **Verifier**: Validates credentials without contacting the issuer
+
+## Project Structure
+
+```
 privacy-credential-system/
 ├── requirements.txt
 ├── run.py
@@ -32,47 +37,57 @@ privacy-credential-system/
     ├── credentials/
     ├── revocation/
     └── wallets/
+```
 
-## Steps to Run the Demo
+## Installation
 
+### Prerequisites
+- Python 3.10+
+- pip (Python package manager)
 
-Clone the repository:
-git clone https://github.com/yourusername/privacy-credential-system.git
-cd privacy-credential-system
+### Setup Steps
 
-Create a virtual environment (recommended):
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/privacy-credential-system.git
+   cd privacy-credential-system
+   ```
 
-Install dependencies:
-pip install cryptography flask click pytest
+2. Create a virtual environment (recommended):
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
+3. Install dependencies:
+   ```bash
+   pip install cryptography flask click pytest
+   ```
 
-Running the System
-1. Run the Automated Demo
+## Usage
+
+### Automated Demo
+
 For a quick demonstration of all features:
-bashpython demo_script.py
-This shows the complete workflow:
 
-Creating an issuer and wallet
-Issuing a credential
-Creating a selective disclosure presentation
-Verifying both the credential and presentation
-Revoking the credential
-Verifying after revocation (should fail)
+```bash
+python demo_script.py
+```
 
-2. Modifying the Demo
-You can modify demo_script.py to test different scenarios:
+This demonstrates the complete workflow:
+- Creating an issuer and wallet
+- Issuing a credential
+- Creating a selective disclosure presentation
+- Verifying both the credential and presentation
+- Revoking the credential
+- Verifying after revocation (should fail)
 
-Change the selective disclosure attributes
-Create expired credentials
-Test signature tampering
-Add multiple credentials to a wallet
-Create multiple issuers and holders
+### Command-Line Interface
 
-3. Using the CLI
-For more interactive usage, use the command-line interface:
-bash# Create an issuer
+For more interactive usage:
+
+```bash
+# Create an issuer
 python run.py issuer create --name "California DMV"
 
 # Create a wallet
@@ -96,61 +111,65 @@ python run.py verifier verify --credential-id <CREDENTIAL_ID>
 # Revoke a credential
 python run.py issuer revoke --issuer-id <ISSUER_ID> \
     --credential-id <CREDENTIAL_ID>
-Replace <ISSUER_ID>, <HOLDER_ID>, and <CREDENTIAL_ID> with the actual IDs displayed when creating those objects.
+```
 
+Replace `<ISSUER_ID>`, `<HOLDER_ID>`, and `<CREDENTIAL_ID>` with the actual IDs displayed when creating those objects.
 
+## Demo Output Explanation
 
-#### Current Output explanation (See Sample_Run.png)
-The output you're seeing shows the successful execution of your privacy-preserving digital credential system demo! Let me explain what's happening at each step:
+The demo script will display the following workflow:
 
-System Setup:
+### 1. System Setup
+- Creates necessary directories for storing credentials, wallets, and revocation lists
 
-The script creates the necessary directories for storing credentials, wallets, and revocation lists.
+### 2. Issuer Creation
+- Creates an issuer (e.g., "California DMV") with a unique ID
 
+### 3. Wallet Creation
+- Creates a wallet for a holder (e.g., "Alice Johnson") with its own unique ID
 
-Issuer Creation:
+### 4. Credential Issuance
+- The issuer creates a credential for the holder
+- The credential contains attributes and is cryptographically signed
 
-It creates an issuer named "California DMV" with a unique ID.
+### 5. Presentation Creation
+- The holder creates a "presentation" with selective disclosure of attributes
+- This demonstrates the privacy-preserving feature of revealing only necessary information
 
+### 6. Credential Verification
+- Both the full credential and selective presentation are verified successfully
 
-Wallet Creation:
+### 7. Credential Revocation
+- The issuer revokes the credential
+- This updates the revocation list without contacting the holder
 
-It creates a wallet for "Alice Johnson" with its own unique ID.
+### 8. Post-Revocation Verification
+- Verification of both credential and presentation fails
+- System shows they're invalid because the credential was revoked
+- This demonstrates privacy-preserving revocation checking
 
+## Customizing the Demo
 
-Credential Issuance:
+You can modify `demo_script.py` to test different scenarios:
 
-The California DMV issues a driver's license credential to Alice
-The credential contains attributes like name, DOB, license class, state, and address
-The credential receives a unique ID and is cryptographically signed by the issuer
+- Change the selective disclosure attributes
+- Create expired credentials
+- Test signature tampering
+- Add multiple credentials to one wallet
+- Create multiple issuers and holders
 
+## Key Privacy Features
 
-Presentation Creation:
+1. **Decentralized Verification**: Verifiers can check credential validity without contacting the issuer
+2. **Selective Disclosure**: Holders can choose which attributes to reveal
+3. **Privacy-Preserving Revocation**: Revocation status can be checked without revealing the holder's identity
 
-Alice creates a "presentation" of her credential that only reveals selected attributes (name and DOB)
-This is a privacy-preserving feature that allows revealing only what's necessary
-The presentation is saved to a JSON file
+## Troubleshooting
 
+- If you encounter import errors, check that all files are in the correct locations
+- Ensure all dependencies are installed correctly
+- Verify that data directories exist and are writable
 
-Credential Verification:
+## License
 
-The full credential is verified successfully (✅ Valid)
-The selective presentation is also verified successfully (✅ Valid)
-
-
-Credential Revocation:
-
-The DMV revokes Alice's credential
-This updates the revocation list without contacting Alice
-
-
-Post-Revocation Verification:
-
-Both the full credential and the presentation now fail verification
-The system correctly shows they're invalid because the credential was revoked
-This demonstrates privacy-preserving revocation checking
-
-
-Demo Completion:
-
-The demo completes successfully, showing the core privacy-preserving features work
+[Your chosen license]
