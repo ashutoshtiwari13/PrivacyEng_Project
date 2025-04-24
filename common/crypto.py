@@ -3,10 +3,10 @@ Cryptographic utilities for the privacy-preserving digital credential system.
 """
 
 import base64
-import os
+from typing import List, Tuple
 from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.hazmat.primitives import serialization
-
+from hashlib import sha256
 
 class CryptoManager:
     """
@@ -84,3 +84,63 @@ class CryptoManager:
             return True
         except Exception:
             return False
+
+    
+    @staticmethod
+    def hash_sha256(data: str) -> str:
+        return sha256(data.encode("utf-8")).hexdigest()
+    
+    @staticmethod
+    def generate_root_hash(leaves: List[str]):
+        """Generates a Merkle Tree and returns the root hash"""
+        if len(leaves) == 0:
+            return CryptoManager.hash_sha256("")
+
+        # Hash the leaves to create the first level of the tree
+        layer = [CryptoManager.hash_sha256(leaf) for leaf in leaves]
+
+        # Build the tree upwards
+        while len(layer) > 1:
+            if len(layer) % 2 != 0:  # If there's an odd number, duplicate the last element
+                layer.append(layer[-1])
+            
+            # Hash each pair of nodes
+            layer = [CryptoManager.hash_sha256(layer[i] + layer[i + 1]) for i in range(0, len(layer), 2)]
+
+        assert len(layer) == 1, f"Expected length 1 but was length {len(layer)}"
+        return layer[0]  # The root of the Merkle tree
+
+    @staticmethod
+    def generate_proof(leaves: List[str], cred_uuid: str) -> List[Tuple[str, bool]]:
+        if cred_uuid not in leaves:
+            raise ValueError("Cannot generate a proof for a revoked credential.")
+        
+        proof = []
+
+        # Hash the leaves to create the first level of the tree
+        layer = [CryptoManager.hash_sha256(leaf) for leaf in leaves]
+        cred_index = leaves.index(cred_uuid)
+
+        # Build the tree upwards
+        while len(layer) > 1:
+            if len(layer) % 2 != 0:  # If there's an odd number, duplicate the last element
+                layer.append(layer[-1])
+            
+            proof.append((layer[(cred_index // 2 * 2) + ((cred_index + 1) % 2)], bool((cred_index + 1) % 2)))
+            cred_index = cred_index // 2
+
+            # Hash each pair of nodes
+            layer = [CryptoManager.hash_sha256(layer[i] + layer[i + 1]) for i in range(0, len(layer), 2)]
+
+        return proof
+
+    @staticmethod
+    def check_proof(proof: List[Tuple[str, bool]], cred_uuid: str, root_hash: str) -> bool:
+        running_hash = CryptoManager.hash_sha256(cred_uuid)
+        for sibling, is_right in proof:
+            if is_right:
+                running_hash = CryptoManager.hash_sha256(running_hash + sibling)
+            else:
+                running_hash = CryptoManager.hash_sha256(sibling + running_hash)
+
+        return running_hash == root_hash

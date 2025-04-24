@@ -89,16 +89,13 @@ class Wallet:
         
         Args:
             credential (Credential): The credential to add
-            
-        Returns:
-            bool: True if the credential was added, False otherwise
         """
         if not isinstance(credential, Credential):
-            return False
+            raise ValueError("Credential should be of type Credential")
         
         # Check if the credential is meant for this holder
         if credential.holder_id != self.holder_id:
-            return False
+            raise ValueError("Credential's holder_id does not match that of the wallet.")
         
         # Add the credential to the wallet
         self.credentials[credential.id] = credential
@@ -106,9 +103,7 @@ class Wallet:
         # Save the wallet
         self._save_wallet()
         
-        return True
-    
-    def get_credential(self, credential_id):
+    def get_credential(self, credential_id) -> Optional[Credential]:
         """
         Get a credential from the wallet.
         
@@ -119,7 +114,7 @@ class Wallet:
             Credential: The credential, or None if not found
         """
         return self.credentials.get(credential_id)
-    
+
     def list_credentials(self):
         """
         List all credentials in the wallet.
@@ -154,7 +149,8 @@ class Wallet:
             'issuer_id': credential.issuer_id,
             'holder_id': self.holder_id,
             'type': credential.type,
-            'index': credential.index,  # Include for revocation checking
+            'revocation_uuid': credential.revocation_uuid,  # Include for revocation checking
+            'proof': credential.non_revoked_proof,
             'signature': credential.signature,
             'attributes': {}
         }
@@ -176,12 +172,11 @@ class Wallet:
         
         Args:
             credential_id (str): ID of the credential to remove
-            
-        Returns:
-            bool: True if the credential was removed, False otherwise
         """
-        if credential_id in self.credentials:
-            del self.credentials[credential_id]
-            self._save_wallet()
-            return True
-        return False
+        if credential_id not in self.credentials:
+            raise ValueError("Credential does not belong to one of my crednetials!")
+
+        del self.credentials[credential_id]
+        self._save_wallet()
+        return True
+        

@@ -132,15 +132,8 @@ def verify_credential(credential, presentation=None):
 def revoke_credential(issuer, credential):
     """Revoke a credential."""
     print("\nRevoking credential...")
-    success = issuer.revoke_credential(credential)
-    
-    if success:
-        print(f"✅ Credential {credential.id} has been revoked.")
-    else:
-        print(f"❌ Failed to revoke credential {credential.id}.")
-    
-    return success
-
+    issuer.revoke_credential(credential)
+    print(f"✅ Credential {credential.id} has been revoked.")
 
 def run_demo():
     """Run the complete demonstration workflow."""
@@ -154,18 +147,22 @@ def run_demo():
     # Create issuer and wallet
     issuer = create_sample_issuer()
     wallet = create_sample_wallet()
+    wallet1 = create_sample_wallet()
     
     # Issue credential
+    _ = issue_sample_credential(issuer, wallet1)
+    _ = issue_sample_credential(issuer, wallet1)
+    _ = issue_sample_credential(issuer, wallet1)
     credential = issue_sample_credential(issuer, wallet)
-    
+
     # Create presentation
-    presentation = create_presentation(wallet, credential)
+    # presentation = create_presentation(wallet, credential)
     
     # Verify credential
     verify_credential(credential)
     
     # Verify presentation
-    verify_credential(credential, presentation)
+    # verify_credential(credential, presentation)
     
     # Revoke credential
     revoke_credential(issuer, credential)
@@ -174,7 +171,7 @@ def run_demo():
     verify_credential(credential)
     
     # Verify presentation again (should fail)
-    verify_credential(credential, presentation)
+    # verify_credential(credential, presentation)
     
     print("\n" + "=" * 80)
     print("Demo completed successfully!")
