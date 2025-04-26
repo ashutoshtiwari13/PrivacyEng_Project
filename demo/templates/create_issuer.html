@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block page_title %}Create New Issuer{% endblock %}
+
+{% block content %}
+<div class="section">
+    <form method="post">
+        <div>
+            <label for="name">Issuer Name:</label>
+            <input type="text" id="name" name="name" required placeholder="e.g., California DMV">
+        </div>
+        
+        <button type="submit" class="button">Create Issuer</button>
+    </form>
+</div>
+{% endblock %}

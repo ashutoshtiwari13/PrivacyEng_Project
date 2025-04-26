@@ -1,0 +1,86 @@
+{% extends "layout.html" %}
+
+{% block page_title %}Create Selective Disclosure Presentation{% endblock %}
+
+{% block content %}
+<div class="section">
+    <div class="card" style="margin-bottom: 20px; border-left: 5px solid #0066cc;">
+        <h3 style="margin-top: 0; color: #0066cc;">Privacy-Preserving Selective Disclosure</h3>
+        <p>This feature allows you to create a presentation that reveals only specific attributes from your credential.</p>
+        <p>Select which attributes you want to disclose to the verifier:</p>
+    </div>
+    
+    <h2>Create Presentation from {{ credential.type }}</h2>
+    <p><strong>Holder:</strong> {{ wallet.name }}</p>
+    
+    {% if is_revoked %}
+    <div class="card" style="margin-bottom: 20px; border-left: 5px solid red;">
+        <h3 style="margin-top: 0; color: red;">⚠️ Warning: This Credential is Revoked</h3>
+        <p>This credential has been revoked by the issuer. Any presentations created from it will fail verification.</p>
+    </div>
+    {% endif %}
+    
+    {% if is_expired %}
+    <div class="card" style="margin-bottom: 20px; border-left: 5px solid orange;">
+        <h3 style="margin-top: 0; color: orange;">⚠️ Warning: This Credential is Expired</h3>
+        <p>This credential has expired. Any presentations created from it will fail verification.</p>
+    </div>
+    {% endif %}
+    
+    <form method="post">
+        <div class="card">
+            <h3>Credential Attributes</h3>
+            <p>Select which attributes to include in your presentation:</p>
+            
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <thead>
+                    <tr>
+                        <th style="text-align: center; padding: 8px; border-bottom: 1px solid #ddd; width: 80px;">Include</th>
+                        <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Attribute</th>
+                        <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for key, value in credential.attributes.items() %}
+                    <tr>
+                        <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">
+                            <input type="checkbox" id="attr_{{ key }}" name="attr" value="{{ key }}" checked>
+                        </td>
+                        <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">
+                            <label for="attr_{{ key }}">{{ key }}</label>
+                        </td>
+                        <td style="padding: 8px; border-bottom: 1px solid #eee;">{{ value }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <button type="submit" class="button">Create Presentation</button>
+            <button type="button" class="button" onclick="selectAll(true)" style="background-color: transparent; color: #0066cc; border: 1px solid #0066cc;">Select All</button>
+            <button type="button" class="button" onclick="selectAll(false)" style="background-color: transparent; color: #0066cc; border: 1px solid #0066cc;">Deselect All</button>
+        </div>
+    </form>
+    
+    <div class="card" style="margin-top: 20px;">
+        <h3>How Privacy-Preserving Selective Disclosure Works</h3>
+        <p>When you create a presentation:</p>
+        <ul>
+            <li>Only the attributes you select will be shared with the verifier</li>
+            <li>The presentation still contains the credential's signature and revocation status</li>
+            <li>The verifier can validate authenticity without seeing all attributes</li>
+            <li>Your privacy is enhanced by sharing only what's necessary</li>
+        </ul>
+    </div>
+    
+    <script>
+        function selectAll(checked) {
+            const checkboxes = document.querySelectorAll('input[name="attr"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = checked;
+            });
+        }
+    </script>
+</div>
+{% endblock %}

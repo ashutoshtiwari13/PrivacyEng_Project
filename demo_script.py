@@ -42,7 +42,7 @@ def setup_directories():
 def create_sample_issuer():
     """Create a sample issuer."""
     print("\nCreating issuer...")
-    issuer = create_issuer(name="California DMV")
+    issuer = create_issuer(name="Oakland DMV")
     print(f"Created issuer: {issuer.name} (ID: {issuer.issuer_id})")
     return issuer
 
@@ -50,7 +50,7 @@ def create_sample_issuer():
 def create_sample_wallet():
     """Create a sample wallet."""
     print("\nCreating wallet...")
-    wallet = Wallet(name="Alice Johnson")
+    wallet = Wallet(name="Ashutosh Tiwari")
     print(f"Created wallet for: {wallet.name} (ID: {wallet.holder_id})")
     return wallet
 
@@ -61,17 +61,17 @@ def issue_sample_credential(issuer, wallet):
     
     # Attributes for a driver's license
     attributes = {
-        "name": "Alice Johnson",
-        "DOB": "1990-05-15",
+        "name": "Ashutosh Tiwari",
+        "DOB": "1997-3-13",
         "license_class": "C",
         "state": "California",
-        "address": "123 Main St, San Francisco, CA"
+        "address": "1822 Main St, Berkeley, CA"
     }
     
     # Issue the credential
     credential = issuer.issue_credential(
         holder_id=wallet.holder_id,
-        credential_type="driver_license",
+        credential_type="RealID",
         attributes=attributes,
         expiration_date=int(time.time()) + (365 * 86400)  # Valid for 1 year
     )
@@ -168,13 +168,13 @@ def run_demo():
     verify_credential(credential, presentation)
     
     # Revoke credential
-    revoke_credential(issuer, credential)
+    # revoke_credential(issuer, credential)
     
     # Verify again (should fail)
-    verify_credential(credential)
+    # verify_credential(credential)
     
     # Verify presentation again (should fail)
-    verify_credential(credential, presentation)
+    # verify_credential(credential, presentation)
     
     print("\n" + "=" * 80)
     print("Demo completed successfully!")

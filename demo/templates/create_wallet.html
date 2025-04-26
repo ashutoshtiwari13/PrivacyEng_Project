@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block page_title %}Create New Wallet{% endblock %}
+
+{% block content %}
+<div class="section">
+    <form method="post" action="{{ url_for('create_wallet_route') }}">
+        <div>
+            <label for="name">Holder Name:</label>
+            <input type="text" id="name" name="name" required placeholder="e.g., Alice Johnson">
+        </div>
+        
+        <button type="submit" class="button">Create Wallet</button>
+    </form>
+</div>
+{% endblock %}

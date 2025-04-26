@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block page_title %}Privacy-Preserving Digital Credential System{% endblock %}
+
+{% block content %}
+<div class="section">
+    <h2>Issuers</h2>
+    {% if issuers %}
+        <ul>
+            {% for issuer in issuers %}
+            <li>
+                <a href="{{ url_for('issuer_details', issuer_id=issuer.id) }}">{{ issuer.name }}</a>
+                (ID: {{ issuer.id[:8] }}...)
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No issuers found.</p>
+    {% endif %}
+    <a href="{{ url_for('create_issuer_route') }}" class="button">Create New Issuer</a>
+</div>
+
+<div class="section">
+    <h2>Wallets</h2>
+    {% if wallets %}
+        <ul>
+            {% for wallet in wallets %}
+            <li>
+                <a href="{{ url_for('wallet_details', holder_id=wallet.id) }}">{{ wallet.name }}</a>
+                (ID: {{ wallet.id[:8] }}...)
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No wallets found.</p>
+    {% endif %}
+    <a href="{{ url_for('create_wallet_route') }}" class="button">Create New Wallet</a>
+</div>
+
+<div class="section">
+    <h2>Verifier</h2>
+    <p>Verify credentials without contacting issuers, preserving privacy.</p>
+    <a href="{{ url_for('verifier_home') }}" class="button">Go to Verifier</a>
+</div>
+{% endblock %}

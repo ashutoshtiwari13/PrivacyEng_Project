@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+
+{% block page_title %}Revocation Status{% endblock %}
+
+{% block content %}
+<div class="section">
+    <h2>Revocation Status List</h2>
+    <p><strong>Issuer:</strong> {{ issuer.name }} (ID: {{ issuer.issuer_id[:8] }}...)</p>
+    <p><strong>Last Updated:</strong> {{ revocation_list.last_updated|timestamp_to_date }}</p>
+    
+    <div class="card">
+        <h3>Credential Revocation Status</h3>
+        {% if revoked_statuses %}
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Index</th>
+                        <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Status</th>
+                        <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Credential Details</th>
+                        <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for index, status in revoked_statuses %}
+                    <tr>
+                        <td style="padding: 8px; border-bottom: 1px solid #eee;">{{ index }}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #eee;">
+                            {% if status %}
+                                <span style="color: red; font-weight: bold;">⛔ Revoked</span>
+                            {% else %}
+                                <span style="color: green; font-weight: bold;">✓ Valid</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 8px; border-bottom: 1px solid #eee;">
+                            {% if index in index_to_credential %}
+                                {% set cred = index_to_credential[index] %}
+                                <strong>Type:</strong> {{ cred.type }}<br>
+                                <strong>ID:</strong> {{ cred.id[:8] }}...<br>
+                                <a href="{{ url_for('credential_details', credential_id=cred.id) }}">View Credential</a>
+                            {% else %}
+                                <em>No detailed information available</em>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 8px; border-bottom: 1px solid #eee;">
+                            <form method="post" action="{{ url_for('toggle_revocation_route', issuer_id=issuer.issuer_id, index=index) }}" style="display: inline;">
+                                <button type="submit" class="button" style="padding: 4px 8px; font-size: 12px;">
+                                    {% if status %}
+                                        Unrevoke
+                                    {% else %}
+                                        Revoke
+                                    {% endif %}
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No revocation information available for this issuer.</p>
+        {% endif %}
+    </div>
+    
+    <div class="card">
+        <h3>How Privacy-Preserving Revocation Works</h3>
+        <p>This system uses a privacy-preserving approach to credential revocation:</p>
+        <ul>
+            <li>Each credential is assigned a revocation index when issued</li>
+            <li>The issuer maintains this public revocation list </li>
+            <li>When a credential is presented, the verifier checks this list</li>
+            <li>The issuer never knows when or where a credential is being verified</li>
+            <li>This preserves privacy while allowing revocation</li>
+        </ul>
+        <p>Technical note: The revocation list is stored as a simple array of boolean values (true/false) where the position corresponds to the credential index.</p>
+    </div>
+    
+    <a href="{{ url_for('issuer_details', issuer_id=issuer.issuer_id) }}" class="button" style="margin-top: 20px;">Back to Issuer Details</a>
+</div>
+{% endblock %}

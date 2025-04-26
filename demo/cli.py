@@ -8,10 +8,10 @@ import click
 import time
 from datetime import datetime
 
-from ..issuer import Issuer, create_issuer, load_issuer
-from ..holder import Wallet
-from ..verifier import Verifier
-from ..common.utils import get_credentials_dir, get_wallets_dir, get_revocation_dir
+from issuer import Issuer, create_issuer, load_issuer
+from holder import Wallet
+from verifier import Verifier
+from common.utils import get_credentials_dir, get_wallets_dir, get_revocation_dir
 
 
 @click.group()
@@ -261,7 +261,7 @@ def verify_credential_cmd(presentation, credential_id):
         with open(credential_path, 'r') as f:
             credential_data = json.load(f)
         
-        from ..common.models import Credential
+        from common.models import Credential
         credential = Credential(**credential_data)
         is_valid, details = verifier.verify_credential(credential)
     else:

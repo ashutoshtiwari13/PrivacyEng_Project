@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Privacy-Preserving Digital Credential System{% endblock %}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        nav {
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        nav a {
+            margin-right: 15px;
+            text-decoration: none;
+            color: #0066cc;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .card {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .button {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #0066cc;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .button:hover {
+            background-color: #0055aa;
+        }
+        input, select, textarea {
+            padding: 8px;
+            margin: 5px 0 15px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        label {
+            font-weight: bold;
+        }
+        .flash {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .credential-attributes {
+            margin-top: 10px;
+        }
+        .attribute-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .attribute-row input:first-child {
+            flex: 1;
+            margin-right: 10px;
+        }
+        .attribute-row input:last-child {
+            flex: 2;
+        }
+        .add-attribute {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="#" onclick="window.history.back(); return false;">Back</a>
+    </nav>
+
+    <h1>{% block page_title %}{% endblock %}</h1>
+
+    {% block content %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+
+{% block page_title %}Wallet Details{% endblock %}
+
+{% block content %}
+<div class="section">
+    <h2>{{ wallet.name }}'s Wallet</h2>
+    <p><strong>ID:</strong> {{ wallet.holder_id }}</p>
+    
+    <div class="card">
+        <h3>Credentials</h3>
+        {% if credentials %}
+            <ul>
+                {% for credential in credentials %}
+                <li>
+                    <a href="{{ url_for('wallet_credential_details', holder_id=wallet.holder_id, credential_id=credential.id) }}">
+                        {{ credential.type }}
+                        {% if credential.attributes.name %} - {{ credential.attributes.name }}{% endif %}
+                    </a>
+                    (Issued by: {{ credential.issuer_name }})
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No credentials in this wallet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

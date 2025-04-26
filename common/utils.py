@@ -50,7 +50,7 @@ def get_data_dir():
     # Go up one level to get to the project root
     project_root = os.path.dirname(os.path.dirname(current_dir))
     # Return the data directory path
-    return os.path.join(project_root, 'data')
+    return os.path.join(project_root, 'Privacy Project/data')
 
 
 def get_credentials_dir():

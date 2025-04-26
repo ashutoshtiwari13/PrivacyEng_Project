@@ -1,0 +1,223 @@
+{% extends "layout.html" %}
+
+{% block page_title %}Credential Verifier{% endblock %}
+
+{% block content %}
+<div class="section">
+    <h2>Verify a Credential</h2>
+    <p>Enter a credential ID to verify directly:</p>
+    
+    <form id="credential-form" onsubmit="verifyCredential(); return false;">
+        <div>
+            <label for="credential_id">Credential ID:</label>
+            <input type="text" id="credential_id" name="credential_id" placeholder="Enter credential ID">
+        </div>
+        
+        <button type="submit" class="button">Verify Credential</button>
+    </form>
+</div>
+
+<div class="section">
+    <h2>Verify a Presentation</h2>
+    <p>Paste a presentation JSON to verify:</p>
+    
+    <form id="presentation-form" onsubmit="verifyPresentation(); return false;">
+        <div>
+            <label for="presentation">Presentation JSON:</label>
+            <textarea id="presentation" name="presentation" rows="6" placeholder="Paste presentation JSON here"></textarea>
+        </div>
+        
+        <button type="submit" class="button">Verify Presentation</button>
+    </form>
+</div>
+
+<div id="result" class="section" style="display: none;">
+    <h2>Verification Result</h2>
+    <div id="result-content"></div>
+</div>
+
+<div class="section">
+    <h2>Privacy-Preserving Credential Verification</h2>
+    <div class="card">
+        <h3>How It Works</h3>
+        <p>This verifier demonstrates privacy-preserving verification of digital credentials:</p>
+        <ul>
+            <li><strong>No Issuer Communication:</strong> The verifier checks credentials without contacting the issuer, preserving the holder's privacy</li>
+            <li><strong>Selective Disclosure:</strong> The holder can choose which attributes to reveal in presentations</li>
+            <li><strong>Revocation Checking:</strong> The verifier checks if credentials have been revoked without revealing the holder's identity</li>
+            <li><strong>Cryptographic Verification:</strong> Digital signatures ensure credentials haven't been tampered with</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    // Check if there's a presentation in the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const presentationParam = urlParams.get('presentation');
+    if (presentationParam) {
+        document.getElementById('presentation').value = presentationParam;
+        setTimeout(() => { verifyPresentation(); }, 500);
+    }
+    
+    // Check if there's a credential ID in the URL
+    const credentialIdParam = urlParams.get('credential_id');
+    if (credentialIdParam) {
+        document.getElementById('credential_id').value = credentialIdParam;
+        // Auto-verify if credential ID is provided
+        setTimeout(() => { verifyCredential(); }, 500);
+    }
+
+    function verifyCredential() {
+        const credentialId = document.getElementById('credential_id').value;
+        if (!credentialId) return;
+        
+        const formData = new FormData();
+        formData.append('credential_id', credentialId);
+        
+        // Show loading state
+        const resultDiv = document.getElementById('result');
+        const resultContent = document.getElementById('result-content');
+        resultDiv.style.display = 'block';
+        resultContent.innerHTML = '<div style="text-align: center; padding: 20px;"><p>Verifying credential...</p></div>';
+        
+        fetch('/verifier/verify', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => displayResult(data));
+    }
+    
+    function verifyPresentation() {
+        const presentation = document.getElementById('presentation').value;
+        if (!presentation) return;
+        
+        const formData = new FormData();
+        formData.append('presentation', presentation);
+        
+        // Show loading state
+        const resultDiv = document.getElementById('result');
+        const resultContent = document.getElementById('result-content');
+        resultDiv.style.display = 'block';
+        resultContent.innerHTML = '<div style="text-align: center; padding: 20px;"><p>Verifying presentation...</p></div>';
+        
+        fetch('/verifier/verify', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => displayResult(data));
+    }
+    
+    function displayResult(data) {
+        const resultDiv = document.getElementById('result');
+        const resultContent = document.getElementById('result-content');
+        
+        resultDiv.style.display = 'block';
+        
+        if (data.valid) {
+            resultContent.innerHTML = `
+                <div class="card" style="border-left: 5px solid green;">
+                    <h3 style="color: green;">✅ Credential is Valid</h3>
+                    <div style="display: flex; margin-top: 15px;">
+                        <div style="flex: 1; padding: 10px; border-right: 1px solid #eee;">
+                            <h4>Verification Checks</h4>
+                            <ul style="list-style-type: none; padding-left: 5px;">
+                                <li style="padding: 5px 0;"><span style="color: green;">✓</span> Signature verified</li>
+                                <li style="padding: 5px 0;"><span style="color: green;">✓</span> Not revoked</li>
+                                <li style="padding: 5px 0;"><span style="color: green;">✓</span> Not expired</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1; padding: 10px;">
+                            <h4>Privacy Analysis</h4>
+                            <ul style="list-style-type: none; padding-left: 5px;">
+                                <li style="padding: 5px 0;"><span style="color: green;">✓</span> Issuer not contacted</li>
+                                <li style="padding: 5px 0;"><span style="color: green;">✓</span> Holder privacy preserved</li>
+                                <li style="padding: 5px 0;"><span style="color: green;">✓</span> Credential usage not tracked</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p style="margin-top: 15px;"><strong>Details:</strong> ${data.details.message || 'No additional details'}</p>
+                </div>
+            `;
+        } else {
+            let errorMessage = data.details.error || 'Unknown error';
+            let statusClass = '';
+            let statusTitle = '';
+            let verificationsHTML = '';
+            
+            if (errorMessage.includes('revoked')) {
+                statusClass = 'border-left: 5px solid red;';
+                statusTitle = '⛔ Credential has been Revoked';
+                verificationsHTML = `
+                    <div style="flex: 1; padding: 10px; border-right: 1px solid #eee;">
+                        <h4>Verification Checks</h4>
+                        <ul style="list-style-type: none; padding-left: 5px;">
+                            <li style="padding: 5px 0;"><span style="color: green;">✓</span> Signature verified</li>
+                            <li style="padding: 5px 0;"><span style="color: red;">✗</span> <strong>Revoked by issuer</strong></li>
+                            <li style="padding: 5px 0;"><span style="color: green;">✓</span> Not expired</li>
+                        </ul>
+                    </div>
+                `;
+            } else if (errorMessage.includes('expired')) {
+                statusClass = 'border-left: 5px solid orange;';
+                statusTitle = '⏱️ Credential has Expired';
+                verificationsHTML = `
+                    <div style="flex: 1; padding: 10px; border-right: 1px solid #eee;">
+                        <h4>Verification Checks</h4>
+                        <ul style="list-style-type: none; padding-left: 5px;">
+                            <li style="padding: 5px 0;"><span style="color: green;">✓</span> Signature verified</li>
+                            <li style="padding: 5px 0;"><span style="color: green;">✓</span> Not revoked</li>
+                            <li style="padding: 5px 0;"><span style="color: red;">✗</span> <strong>Expired</strong></li>
+                        </ul>
+                    </div>
+                `;
+            } else if (errorMessage.includes('signature')) {
+                statusClass = 'border-left: 5px solid red;';
+                statusTitle = '🚫 Invalid Signature';
+                verificationsHTML = `
+                    <div style="flex: 1; padding: 10px; border-right: 1px solid #eee;">
+                        <h4>Verification Checks</h4>
+                        <ul style="list-style-type: none; padding-left: 5px;">
+                            <li style="padding: 5px 0;"><span style="color: red;">✗</span> <strong>Invalid signature</strong></li>
+                            <li style="padding: 5px 0;"><span style="color: gray;">-</span> Revocation status unknown</li>
+                            <li style="padding: 5px 0;"><span style="color: gray;">-</span> Expiration status unknown</li>
+                        </ul>
+                    </div>
+                `;
+            } else {
+                statusClass = 'border-left: 5px solid red;';
+                statusTitle = '❌ Credential is Invalid';
+                verificationsHTML = `
+                    <div style="flex: 1; padding: 10px; border-right: 1px solid #eee;">
+                        <h4>Verification Checks</h4>
+                        <ul style="list-style-type: none; padding-left: 5px;">
+                            <li style="padding: 5px 0;"><span style="color: red;">✗</span> <strong>Verification failed</strong></li>
+                            <li style="padding: 5px 0;"><span style="color: gray;">-</span> See details below</li>
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            resultContent.innerHTML = `
+                <div class="card" style="${statusClass}">
+                    <h3 style="color: red;">${statusTitle}</h3>
+                    <div style="display: flex; margin-top: 15px;">
+                        ${verificationsHTML}
+                        <div style="flex: 1; padding: 10px;">
+                            <h4>Privacy Analysis</h4>
+                            <ul style="list-style-type: none; padding-left: 5px;">
+                                <li style="padding: 5px 0;"><span style="color: green;">✓</span> Issuer not contacted</li>
+                                <li style="padding: 5px 0;"><span style="color: green;">✓</span> Holder privacy preserved</li>
+                                <li style="padding: 5px 0;"><span style="color: green;">✓</span> Credential usage not tracked</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p style="margin-top: 15px;"><strong>Error:</strong> ${errorMessage}</p>
+                    <p>This credential cannot be trusted and should not be accepted.</p>
+                </div>
+            `;
+        }
+    }
+</script>
+{% endblock %}
