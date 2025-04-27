@@ -147,12 +147,12 @@ def run_demo():
     # Create issuer and wallet
     issuer = create_sample_issuer()
     wallet = create_sample_wallet()
-    wallet1 = create_sample_wallet()
     
     # Issue credential
-    _ = issue_sample_credential(issuer, wallet1)
-    _ = issue_sample_credential(issuer, wallet1)
-    _ = issue_sample_credential(issuer, wallet1)
+    _ = issue_sample_credential(issuer, wallet)
+    _ = issue_sample_credential(issuer, wallet)
+    _ = issue_sample_credential(issuer, wallet)
+    _ = issue_sample_credential(issuer, wallet)
     credential = issue_sample_credential(issuer, wallet)
 
     # Create presentation
