@@ -4,7 +4,6 @@ Issuer module for the privacy-preserving digital credential system.
 
 import os
 import json
-import time
 from typing import Dict, Any, Optional, List, Tuple
 from dataclasses import asdict
 
@@ -12,7 +11,7 @@ from common.crypto import CryptoManager
 from common.models import Credential, RevocationList
 from common.utils import (
     generate_id, current_timestamp, save_json, load_json,
-    get_credentials_dir, get_revocation_dir
+    get_credentials_dir, get_revocation_dir, uuid
 )
 from .revocation import RevocationManager
 
@@ -33,7 +32,6 @@ class Issuer:
         """
         self.issuer_id = issuer_id or generate_id()
         self.name = name or f"Issuer-{self.issuer_id[:8]}"
-        self.credentials_counter = 0
         
         # Load or generate keys
         self._load_or_generate_keys()
@@ -52,7 +50,6 @@ class Issuer:
             self.name = issuer_data.get('name', self.name)
             self.private_key = issuer_data.get('private_key')
             self.public_key = issuer_data.get('public_key')
-            self.credentials_counter = issuer_data.get('credentials_counter', 0)
         else:
             # Generate new keys
             keypair = CryptoManager.generate_keypair()
@@ -73,7 +70,6 @@ class Issuer:
             'name': self.name,
             'private_key': self.private_key,
             'public_key': self.public_key,
-            'credentials_counter': self.credentials_counter
         }
         save_json(issuer_data, self._get_issuer_file_path())
     
@@ -100,8 +96,8 @@ class Issuer:
         credential_id = generate_id()
         
         # Get the next index for revocation
-        index = self.credentials_counter
-        self.credentials_counter += 1
+        revocation_uuid = generate_id()
+        proof = self.revocation_manager.add_credential(revocation_uuid)  # adds the credential to the non_revoked list
         
         # Create the credential
         credential = Credential(
@@ -113,7 +109,8 @@ class Issuer:
             attributes=attributes,
             issuance_date=current_timestamp(),
             expiration_date=expiration_date,
-            index=index
+            non_revoked_proof=proof,
+            revocation_uuid=revocation_uuid,
         )
         
         # Sign the credential
@@ -133,15 +130,13 @@ class Issuer:
         
         return credential
     
-    def revoke_credential(self, credential_or_id) -> bool:
+    def revoke_credential(self, credential_or_id):
         """
         Revoke a credential.
         
         Args:
             credential_or_id: Either a Credential object or a credential ID
             
-        Returns:
-            bool: True if the revocation was successful, False otherwise
         """
         # Get the credential
         if isinstance(credential_or_id, Credential):
@@ -153,11 +148,11 @@ class Issuer:
             )
             credential_data = load_json(credential_path)
             if not credential_data:
-                return False
+                raise FileNotFoundError("Could not find credential path")
             credential = Credential.from_json(json.dumps(credential_data))
         
         # Revoke the credential using the revocation manager
-        return self.revocation_manager.revoke(credential.index)
+        self.revocation_manager.revoke(credential.revocation_uuid)
     
     def get_public_info(self) -> Dict[str, Any]:
         """
